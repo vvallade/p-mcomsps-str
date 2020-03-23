@@ -309,7 +309,6 @@ void
 MapleCOMSPSSolver::increaseClauseProduction()
 {
    lbdLimit++;
-   cout << "id: " << id << " lbdLimit:" << lbdLimit.load() << endl;
 }
 
 void
@@ -318,7 +317,6 @@ MapleCOMSPSSolver::decreaseClauseProduction()
    if (lbdLimit > 2) {
       lbdLimit--;
    }
-   cout << "id: " << id << " lbdLimit:" << lbdLimit.load() << endl;
 }
 
 SolvingStatistics
