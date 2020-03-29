@@ -116,16 +116,9 @@ int main(int argc, char ** argv)
 
 
    // Init Sharing
-   vector<SolverInterface *> from;
-   nSharers = nSolvers;
+   nSharers = 1;
    sharers  = new Sharer*[nSharers];
-
-   for (int id = 0; id < nSharers; id++) {
-      from.clear();
-      from.push_back(solvers[id]);
-      sharers[id] = new Sharer(id, new HordeSatSharing(), from, solvers);
-   }
-
+   sharers[0] = new Sharer(1, new HordeSatSharing(), solvers, solvers);
 
    // Init working
    working = new Portfolio();
