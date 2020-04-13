@@ -134,6 +134,12 @@ public:
    /// Native diversification.
    virtual void diversify(int id) = 0;
 
+   /// Return the final analysis in case of UNSAT result.
+   virtual vector<int> getFinalAnalysis() = 0;
+
+   virtual vector<int> getSatAssumptions() = 0;
+
+
    /// Constructor.
    SolverInterface(int solverId, SolverType solverType)
    {

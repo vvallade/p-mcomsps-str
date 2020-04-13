@@ -91,7 +91,12 @@ int main(int argc, char ** argv)
    vector<SolverInterface *> solvers_VSIDS;
    vector<SolverInterface *> solvers_LRB;
 
-   SolverFactory::createMapleCOMSPSSolvers(cpus, solvers);
+   if (Parameters::getBoolParam("strength") && cpus >= 2) {
+      SolverFactory::createMapleCOMSPSSolvers(cpus - 1, solvers);
+      solvers.push_back(SolverFactory::createReducerSolver(SolverFactory::createMapleCOMSPSSolver()));
+   } else {
+      SolverFactory::createMapleCOMSPSSolvers(cpus, solvers);
+   }
 
    int nSolvers = solvers.size();
 

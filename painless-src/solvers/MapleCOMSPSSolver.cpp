@@ -200,6 +200,12 @@ MapleCOMSPSSolver::diversify(int id)
    } else {
       solver->VSIDS = true;
    }
+
+   if (id % 4 >= 2) {
+      solver->verso = false;
+   } else {
+      solver->verso = true;
+   }
 }
 
 // Solve the formula with a given set of assumptions
@@ -347,3 +353,28 @@ MapleCOMSPSSolver::getModel()
 
    return model;
 }
+
+
+vector<int>
+MapleCOMSPSSolver::getFinalAnalysis()
+{
+   vector<int> outCls;
+
+   for (int i = 0; i < solver->conflict.size(); i++) {
+      outCls.push_back(INT_LIT(solver->conflict[i]));
+   }
+
+   return outCls;
+}
+
+
+vector<int>
+MapleCOMSPSSolver::getSatAssumptions() {
+   vector<int> outCls;
+   vec<Lit> lits;
+   solver->getAssumptions(lits);
+   for (int i = 0; i < lits.size(); i++) {
+     outCls.push_back(-(INT_LIT(lits[i])));
+   }
+   return outCls;
+};

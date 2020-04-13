@@ -114,6 +114,8 @@ public:
 
     // Solving:
     //
+    bool    shrinkAssumptions();
+    void    getAssumptions(vec<Lit>& lits);
     bool    simplify     (bool do_stamping = false); // Removes already satisfied clauses.
     bool    solve        (const vec<Lit>& assumps); // Search for a model that respects a given set of assumptions.
     lbool   solveLimited (const vec<Lit>& assumps); // Search for a model that respects a given set of assumptions (With resource constraints).
@@ -183,6 +185,7 @@ public:
     double    random_var_freq;
     double    random_seed;
     bool      VSIDS;
+    bool      verso;
     int       ccmin_mode;         // Controls conflict clause minimization (0=none, 1=basic, 2=deep).
     int       phase_saving;       // Controls the level of phase saving (0=none, 1=limited, 2=full).
     bool      rnd_pol;            // Use random polarities for branching heuristics.
@@ -230,8 +233,13 @@ protected:
 
     struct VarOrderLt {
         const vec<double>&  activity;
-        bool operator () (Var x, Var y) const { return activity[x] > activity[y]; }
-        VarOrderLt(const vec<double>&  act) : activity(act) { }
+        const bool & verso;
+        bool operator () (Var x, Var y) const {
+            if (verso) return activity[x] > activity[y];
+            return activity[x] >= activity[y];
+        }
+        VarOrderLt(const vec<double>&  act, const bool & v) : activity(act), verso(v) {
+        }
     };
 
     // Solver state:
