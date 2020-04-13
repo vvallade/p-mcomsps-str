@@ -74,6 +74,7 @@ Solver::Solver() :
   , random_var_freq  (opt_random_var_freq)
   , random_seed      (opt_random_seed)
   , VSIDS            (false)
+  , verso            (true)
   , ccmin_mode       (opt_ccmin_mode)
   , phase_saving     (opt_phase_saving)
   , rnd_pol          (false)
@@ -104,8 +105,8 @@ Solver::Solver() :
   , qhead              (0)
   , simpDB_assigns     (-1)
   , simpDB_props       (0)
-  , order_heap_CHB     (VarOrderLt(activity_CHB))
-  , order_heap_VSIDS   (VarOrderLt(activity_VSIDS))
+  , order_heap_CHB     (VarOrderLt(activity_CHB, verso))
+  , order_heap_VSIDS   (VarOrderLt(activity_VSIDS, verso))
   , progress_estimate  (0)
   , remove_satisfied   (true)
 
@@ -138,6 +139,7 @@ Solver::Solver(const Solver &s) :
   , random_var_freq  (s.random_var_freq)
   , random_seed      (s.random_seed)
   , VSIDS            (s.VSIDS)
+  , verso            (s.verso)
   , ccmin_mode       (s.ccmin_mode)
   , phase_saving     (s.phase_saving)
   , rnd_pol          (s.rnd_pol)
@@ -165,8 +167,8 @@ Solver::Solver(const Solver &s) :
   , qhead(s.qhead)
   , simpDB_assigns(s.simpDB_assigns)
   , simpDB_props(s.simpDB_props)
-  , order_heap_CHB(VarOrderLt(activity_CHB))
-  , order_heap_VSIDS(VarOrderLt(activity_VSIDS))
+  , order_heap_CHB(VarOrderLt(activity_CHB, verso))
+  , order_heap_VSIDS(VarOrderLt(activity_VSIDS, verso))
   , progress_estimate(s.progress_estimate)
   , remove_satisfied(s.remove_satisfied)
 
@@ -329,6 +331,8 @@ bool Solver::addClause_(vec<Lit>& ps)
 bool Solver::importUnitClauses() {
     assert(decisionLevel() == 0);
 
+    if (cbkImportUnit == NULL)
+        return true;
     Lit l;
     while ((l = cbkImportUnit(issuer)) != lit_Undef) {
         if (value(var(l)) == l_Undef) {
@@ -344,6 +348,8 @@ bool Solver::importUnitClauses() {
 bool Solver::importClauses() {
     assert(decisionLevel() == 0);
 
+    if (cbkImportClause == NULL)
+        return true;
     int lbd, k, l;
     bool alreadySat;
     while (cbkImportClause(issuer, &lbd, importedClause)) {
@@ -1162,8 +1168,8 @@ lbool Solver::search(int& nof_conflicts)
 
             learnt_clause.clear();
             analyze(confl, learnt_clause, backtrack_level, lbd);
-
-            cbkExportClause(issuer, lbd, learnt_clause);
+            if (cbkExportClause != NULL)
+                cbkExportClause(issuer, lbd, learnt_clause);
 
             cancelUntil(backtrack_level);
 
@@ -1250,7 +1256,7 @@ lbool Solver::search(int& nof_conflicts)
                 reduceDB(); }
 
             Lit next = lit_Undef;
-            /*while (decisionLevel() < assumptions.size()){
+            while (decisionLevel() < assumptions.size()){
                 // Perform user provided assumption:
                 Lit p = assumptions[decisionLevel()];
                 if (value(p) == l_True){
@@ -1265,7 +1271,12 @@ lbool Solver::search(int& nof_conflicts)
                 }
             }
 
-            if (next == lit_Undef)*/{
+            if (next == lit_Undef) {
+                if (assumptions.size() > 0) { // Hack deguelasse
+                    shrinkAssumptions();
+                    return l_True;
+                }
+
                 // New variable decision:
                 decisions++;
                 next = pickBranchLit();
@@ -1282,6 +1293,27 @@ lbool Solver::search(int& nof_conflicts)
     }
 }
 
+bool Solver::shrinkAssumptions() {
+    assert(ok);
+    // Should be exactly equal because dummy levels are introduced
+    assert(decisionLevel() == assumptions.size());
+    unsigned int sz = assumptions.size();
+    // Remove literals corresponding to dummy decision levels
+    int i, j;
+    for( i = j = 0; i < assumptions.size(); i++ ) {
+        if ( trail_lim[i] < trail.size() && trail[trail_lim[i]] == assumptions[i]) {
+            assumptions[j++] = assumptions[i];
+        }
+    }
+    assumptions.shrink(i-j);
+    return assumptions.size() < sz;
+}
+
+void Solver::getAssumptions(vec<Lit>& lits) {
+    for (int i = 0; i < assumptions.size(); i++) {
+        lits.push(assumptions[i]);
+    }
+}
 
 double Solver::progressEstimate() const
 {

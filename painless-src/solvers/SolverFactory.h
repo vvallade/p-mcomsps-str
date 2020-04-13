@@ -38,6 +38,8 @@ public:
    static void createMapleCOMSPSSolvers(int groupSize,
                                         vector<SolverInterface *> & solvers);
 
+   static SolverInterface * createReducerSolver(SolverInterface *solver);
+
    /// Clone and return a new solver.
    static SolverInterface * cloneSolver(SolverInterface * other);
 

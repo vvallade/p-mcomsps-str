@@ -28,13 +28,13 @@ using namespace std;
 // Some forward declatarations for MapleCOMSPS
 namespace MapleCOMSPS
 {
-	class SimpSolver;
-	class Lit;
-	template<class T> class vec;
+   class SimpSolver;
+   class Lit;
+   template<class T> class vec;
 }
 
 /// Instance of a MapleCOMSPS solver
-class MapleCOMSPSSolver : public SolverInterface
+class Reducer : public SolverInterface
 {
 public:
    /// Load formula from a given dimacs file, return false if failed.
@@ -59,6 +59,8 @@ public:
    void unsetSolverInterrupt();
 
    /// Solve the formula with a given cube.
+   SatResult solve_(const vector<int> & cube);
+
    SatResult solve(const vector<int> & cube);
 
    /// Add a permanent clause to the formula.
@@ -91,45 +93,32 @@ public:
    /// Return the model in case of SAT result.
    vector<int> getModel();
    
+   /// Return the final analysis in case of UNSAT.
+   vector<int> getFinalAnalysis();
+   
    /// Native diversification.
    void diversify(int id);
 
-   /// Constructor.
-   MapleCOMSPSSolver(int id);
-   
-   /// Copy constructor.
-   MapleCOMSPSSolver(const MapleCOMSPSSolver & other, int id);
-   
-   /// Destructor.
-   virtual ~MapleCOMSPSSolver();
+   bool strengthed(ClauseExchange * cls, ClauseExchange ** outCls);
 
-   vector<int> getFinalAnalysis();
+   void printStatsStrengthening();
 
    vector<int> getSatAssumptions();
 
+   /// Constructor.
+   Reducer(int id, SolverInterface* solver);
+   
+   /// Destructor.
+   virtual ~Reducer();
 
 protected:
    /// Pointer to a MapleCOMSPS solver.
-   MapleCOMSPS::SimpSolver * solver;
+   SolverInterface * solver;
 
    /// Buffer used to import clauses (units included).
    ClauseBuffer clausesToImport;
-   ClauseBuffer unitsToImport;
 
    /// Buffer used to export clauses (units included).
    ClauseBuffer clausesToExport;
 
-   /// Buffer used to add permanent clauses.
-   ClauseBuffer clausesToAdd;
-   
-   /// Size limit used to share clauses.
-   atomic<int> lbdLimit;
-   
-   /// Used to stop or continue the resolution.
-   atomic<bool> stopSolver;
-   
-   /// Callback to export/import clauses.
-   friend MapleCOMSPS::Lit cbkMapleCOMSPSImportUnit(void *);
-   friend bool cbkMapleCOMSPSImportClause(void *, int *, MapleCOMSPS::vec<MapleCOMSPS::Lit> &);
-   friend void cbkMapleCOMSPSExportClause(void *, int, MapleCOMSPS::vec<MapleCOMSPS::Lit> &);
 };

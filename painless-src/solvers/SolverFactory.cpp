@@ -19,6 +19,7 @@
 
 #include "../solvers/MapleCOMSPSSolver.h"
 #include "../solvers/SolverFactory.h"
+#include "../solvers/Reducer.h"
 #include "../utils/Parameters.h"
 #include "../utils/System.h"
 
@@ -57,6 +58,16 @@ SolverFactory::createMapleCOMSPSSolver()
    SolverInterface * solver = new MapleCOMSPSSolver(id);
 
    solver->loadFormula(Parameters::getFilename());
+
+   return solver;
+}
+
+SolverInterface *
+SolverFactory::createReducerSolver(SolverInterface* _solver)
+{
+   int id = currentIdSolver.fetch_add(1);
+
+   SolverInterface * solver = new Reducer(id, _solver);
 
    return solver;
 }
