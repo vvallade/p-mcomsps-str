@@ -202,15 +202,32 @@ of literals (respectively, less than 1125 and more than 1470) are dispatched.
 \section{\preduce}
 \label{sec:instance2}
 
-This section describes the overall behaviour of our competing instantiation
-named \preduce. This solver is based on our solver \pmcomsps described in
-Section~\ref{sec:instance1} and implements concurrent strengthening~\cite{}.
-
-\ludovic{Add content to this section.}
+This section describes the overall behaviour of our second competing
+instantiation named \preduce. This solver is based on our solver \pmcomsps
+described in Section~\ref{sec:instance1} and implements concurrent
+strengthening~\cite{}.
 
 \subsection{Sequential Engines: Strengthener}
 
+The \textit{reducer} engine (\texttt{R}) of Fig.~\ref{fig:instance} implements
+the algorithm introduced in~\cite{strength_13}.
+
+We implemented the strengthening operation as a decorator of
+\textit{SolverInterface}. This decorator is a \textit{SolverInterface} itself
+that uses, by delegation, another \textit{SolverInterface} to apply the
+strengthening, in the present case a \maple solver.
+
+The reducer is part of the portfolio.
+
 \subsection{Sharing: Online Strengthening}
+
+The reducer engine is both a consumer and a producer of the sharer
+(\texttt{Shr}). It receives clauses from the different cores, strengthened
+them if possible, and exports them back after. The sharing mechanism will then
+share this strengthen clauses.
+
+Since, a strengthened clause subsumes the original one, it is likely that cores
+will forget the original clause over time.
 
 \section*{Acknowledgment}
 
