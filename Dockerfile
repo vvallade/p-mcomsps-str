@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 RUN apt-get update && apt-get install -y openssh-server git
 RUN mkdir /var/run/sshd
-RUN echo 'root:THEPASSWORDYOUCREATED' | chpasswd
+RUN echo 'root:satlip6' | chpasswd
 RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
 # SSH login fix. Otherwise user is kicked off after login
@@ -39,7 +39,6 @@ RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev iputils-ping -y
 ADD painless painless
 
 RUN cd painless && make -j 4
-RUN mv painless/painless-mcomsps painless
 ADD mpi-run.sh supervised-scripts/mpi-run.sh
 ADD make_combined_hostfile.py supervised-scripts/make_combined_hostfile.py
 RUN chmod 755 supervised-scripts/mpi-run.sh
