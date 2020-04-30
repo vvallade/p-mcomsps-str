@@ -79,7 +79,7 @@ SolverFactory::createMapleCOMSPSSolvers(int maxSolvers,
    solvers.push_back(createMapleCOMSPSSolver());
 
    double memoryUsed    = getMemoryUsed();
-   int maxMemorySolvers = Parameters::getIntParam("max-memory", 51) * 1024 *
+   int maxMemorySolvers = Parameters::getIntParam("max-memory", 200) * 1024 *
                           1024 / memoryUsed;
 
    if (maxSolvers > maxMemorySolvers) {

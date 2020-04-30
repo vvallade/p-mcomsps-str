@@ -67,7 +67,7 @@ int main(int argc, char ** argv)
       cout << "USAGE: " << argv[0] << " [options] input.cnf" << endl;
       cout << "Options:" << endl;
       cout << "\t-c=<INT>\t\t number of cpus, default is 24" << endl;
-      cout << "\t-max-memory=<INT>\t memory limit in GB, default is 51" << \
+      cout << "\t-max-memory=<INT>\t memory limit in GB, default is 200" << \
 	      endl;
       cout << "\t-t=<INT>\t\t timeout in seconds, default is no limit" << endl;
       cout << "\t-lbd-limit=<INT>\t LBD limit of exported clauses, default is" \
