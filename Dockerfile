@@ -39,12 +39,12 @@ RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev iputils-ping -y
 ADD painless painless
 
 RUN cd painless && make -j 4
-ADD mpi-run.sh supervised-scripts/mpi-run.sh
+ADD run.sh supervised-scripts/run.sh
 ADD make_combined_hostfile.py supervised-scripts/make_combined_hostfile.py
-RUN chmod 755 supervised-scripts/mpi-run.sh
+RUN chmod 755 supervised-scripts/run.sh
 EXPOSE 22
 
-CMD supervised-scripts/mpi-run.sh
+CMD supervised-scripts/run.sh
 
 
 
