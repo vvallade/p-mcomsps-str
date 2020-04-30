@@ -31,73 +31,85 @@ if [ "${AWS_BATCH_JOB_MAIN_NODE_INDEX}" == "${AWS_BATCH_JOB_NODE_INDEX}" ]; then
 fi
 
 # wait for all nodes to report
-wait_for_nodes () {
-  log "Running as master node"
+# wait_for_nodes () {
+#   log "Running as master node"
 
-  touch $HOST_FILE_PATH
-  ip=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)
+#   touch $HOST_FILE_PATH
+#   ip=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)
 
-  availablecores=$(nproc)
-  log "master details -> $ip:$availablecores"
-#  echo "$ip slots=$availablecores" >> $HOST_FILE_PATH
-  echo "$ip" >> $HOST_FILE_PATH
-  lines=$(ls -dq /tmp/hostfile* | wc -l)
-  while [ "${AWS_BATCH_JOB_NUM_NODES}" -gt "${lines}" ]
-  do
-    cat $HOST_FILE_PATH
-    lines=$(ls -dq /tmp/hostfile* | wc -l)
+#   availablecores=$(nproc)
+#   log "master details -> $ip:$availablecores"
+# #  echo "$ip slots=$availablecores" >> $HOST_FILE_PATH
+#   echo "$ip" >> $HOST_FILE_PATH
+#   lines=$(ls -dq /tmp/hostfile* | wc -l)
+#   while [ "${AWS_BATCH_JOB_NUM_NODES}" -gt "${lines}" ]
+#   do
+#     cat $HOST_FILE_PATH
+#     lines=$(ls -dq /tmp/hostfile* | wc -l)
 
-    log "$lines out of $AWS_BATCH_JOB_NUM_NODES nodes joined, check again in 1 second"
-    sleep 1
-#    lines=$(sort $HOST_FILE_PATH|uniq|wc -l)
-  done
+#     log "$lines out of $AWS_BATCH_JOB_NUM_NODES nodes joined, check again in 1 second"
+#     sleep 1
+# #    lines=$(sort $HOST_FILE_PATH|uniq|wc -l)
+#   done
 
 
-  # All of the hosts report their IP and number of processors. Combine all these
-  # into one file with the following script:
-  python supervised-scripts/make_combined_hostfile.py ${ip}
-  cat combined_hostfile
+#   # All of the hosts report their IP and number of processors. Combine all these
+#   # into one file with the following script:
+#   python supervised-scripts/make_combined_hostfile.py ${ip}
+#   cat combined_hostfile
 
-  # REPLACE THE FOLLOWING LINE WITH YOUR PARTICULAR SOLVER
-  #time mpirun --mca btl_tcp_if_include eth0 --allow-run-as-root -np ${AWS_BATCH_JOB_NUM_NODES} --hostfile combined_hostfile /hordesat/hordesat  -c=${NUM_PROCESSES} -t=28800 -d=7 supervised-scripts/test.cnf
-  time mpirun --mca btl_tcp_if_include eth0 --allow-run-as-root -np ${AWS_BATCH_JOB_NUM_NODES} --hostfile combined_hostfile /painless/painless-mcomsps -c=${NUM_PROCESSES} -strength -shr-sleep=1500000 supervised-scripts/test.cnf
-}
+#   # REPLACE THE FOLLOWING LINE WITH YOUR PARTICULAR SOLVER
+#   #time mpirun --mca btl_tcp_if_include eth0 --allow-run-as-root -np ${AWS_BATCH_JOB_NUM_NODES} --hostfile combined_hostfile /hordesat/hordesat  -c=${NUM_PROCESSES} -t=28800 -d=7 supervised-scripts/test.cnf
+#   time mpirun --mca btl_tcp_if_include eth0 --allow-run-as-root -np ${AWS_BATCH_JOB_NUM_NODES} --hostfile combined_hostfile /painless/painless-mcomsps -c=${NUM_PROCESSES} -strength -shr-sleep=1500000 supervised-scripts/test.cnf
+# }
 
 # Fetch and run a script
-report_to_master () {
-  # get own ip and num cpus
-  #
-  ip=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)
+# report_to_master () {
+#   # get own ip and num cpus
+#   #
+#   ip=$(/sbin/ip -o -4 addr list eth0 | awk '{print $4}' | cut -d/ -f1)
 
 
-  availablecores=$(nproc)
+#   availablecores=$(nproc)
 
-  log "I am a child node -> $ip:$availablecores, reporting to the master node -> ${AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS}"
+#   log "I am a child node -> $ip:$availablecores, reporting to the master node -> ${AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS}"
 
-#  echo "$ip slots=$availablecores" >> $HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX}
-  echo "$ip" >> $HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX}
-  ping -c 3 ${AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS}
-  until scp $HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX} ${AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS}:$HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX}
-  do
-    echo "Sleeping 5 seconds and trying again"
-  done
-  log "done! goodbye"
-  ps -ef | grep sshd
-  tail -f /dev/null
-}
+# #  echo "$ip slots=$availablecores" >> $HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX}
+#   echo "$ip" >> $HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX}
+#   ping -c 3 ${AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS}
+#   until scp $HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX} ${AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS}:$HOST_FILE_PATH${AWS_BATCH_JOB_NODE_INDEX}
+#   do
+#     echo "Sleeping 5 seconds and trying again"
+#   done
+#   log "done! goodbye"
+#   ps -ef | grep sshd
+#   tail -f /dev/null
+# }
 ##
 #
 # Main - dispatch user request to appropriate function
+# log $NODE_TYPE
+# case $NODE_TYPE in
+#   main)
+#     wait_for_nodes "${@}"
+#     ;;
+
+#   child)
+#     report_to_master "${@}"
+#     ;;
+
+#   *)
+#     log $NODE_TYPE
+#     usage "Could not determine node type. Expected (main/child)"
+#     ;;
+# esac
+
+
 log $NODE_TYPE
 case $NODE_TYPE in
   main)
-    wait_for_nodes "${@}"
+    time /painless/painless-mcomsps -c=${NUM_PROCESSES} -strength -shr-sleep=1500000 supervised-scripts/test.cnf
     ;;
-
-  child)
-    report_to_master "${@}"
-    ;;
-
   *)
     log $NODE_TYPE
     usage "Could not determine node type. Expected (main/child)"
