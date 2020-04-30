@@ -189,5 +189,5 @@ int main(int argc, char ** argv)
       cout << "s UNKNOWN" << endl;
    }
 
-   return finalResult;
+   return 0;
 }
