@@ -82,7 +82,7 @@ int main(int argc, char ** argv)
 
    Parameters::printParams();
 
-   int cpus = Parameters::getIntParam("c", 23);
+   int cpus = Parameters::getIntParam("c", 32);
    setVerbosityLevel(Parameters::getIntParam("v", 0));
 
 
@@ -91,13 +91,8 @@ int main(int argc, char ** argv)
    vector<SolverInterface *> solvers_VSIDS;
    vector<SolverInterface *> solvers_LRB;
 
-   if (Parameters::getBoolParam("strength") && cpus >= 2) {
-      SolverFactory::createMapleCOMSPSSolvers(cpus - 1, solvers);
-      solvers.push_back(SolverFactory::createReducerSolver(SolverFactory::createMapleCOMSPSSolver()));
-   } else {
-      SolverFactory::createMapleCOMSPSSolvers(cpus, solvers);
-   }
-
+   SolverFactory::createMapleCOMSPSSolvers(cpus - 1, solvers);
+   solvers.push_back(SolverFactory::createReducerSolver(SolverFactory::createMapleCOMSPSSolver()));
    int nSolvers = solvers.size();
 
    cout << "c " << nSolvers << " solvers are used, with IDs in [|0, "
